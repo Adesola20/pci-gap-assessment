@@ -648,7 +648,8 @@ export default function PCIGapAssessment() {
           </div>
         </div>
       )}
-    );
+    </div>
+  );
   }
 
   return (
