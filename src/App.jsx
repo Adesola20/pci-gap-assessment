@@ -99,7 +99,7 @@ const SAQ_DATA = {
         { id: "R5-C5", ref: "5.2.3", risk_level: "medium", question: "Are system components not at risk from malware evaluated periodically, with evaluations documented and retained?" },
         { id: "R5-C6", ref: "5.2.3.1", risk_level: "medium", question: "Is the frequency of periodic evaluations of system components not at risk for malware defined in the entity's targeted risk analysis?" },
         { id: "R5-C7", ref: "5.3.1", risk_level: "high", question: "Is anti-malware kept current via automatic updates?" },
-        { id: "R5-C8", ref: "5.3.2", risk_level: "high", question: "Does the anti-malware solution perform periodic scans AND real-time or continuous behavioural analysis?" },
+        { id: "R5-C8", ref: "5.3.2", risk_level: "high", question: "Does the anti-malware solution perform both periodic scans and real-time or continuous behavioural analysis?" },
         { id: "R5-C9", ref: "5.3.2.1", risk_level: "medium", question: "If periodic malware scans are performed, is the frequency defined in the entity's targeted risk analysis?" },
         { id: "R5-C10", ref: "5.3.3", risk_level: "high", question: "For removable electronic media, does the anti-malware solution perform automatic scans when the media is inserted, connected, or logically mounted?" },
         { id: "R5-C11", ref: "5.3.4", risk_level: "high", question: "Are audit logs for the anti-malware solution enabled and retained in accordance with Requirement 10.5?" },
@@ -231,7 +231,7 @@ const SAQ_DATA = {
         { id: "R10-C13", ref: "10.3.2", risk_level: "high", question: "Are audit log files protected from modification by individuals, with controls preventing unauthorised changes to log data?" },
         { id: "R10-C14", ref: "10.3.3", risk_level: "critical", question: "Are audit log files backed up promptly to a centralised log server or media that is difficult to alter?" },
         { id: "R10-C15", ref: "10.3.4", risk_level: "high", question: "Are file integrity monitoring or change detection tools used on audit logs to ensure existing log data cannot be changed without generating alerts?" },
-        { id: "R10-C16", ref: "10.4.1", risk_level: "high", question: "Are logs from all system components reviewed at least once daily via automated or manual processes?" },
+        { id: "R10-C16", ref: "10.4.1", risk_level: "high", question: "Are logs from all system components in scope reviewed at least once daily via automated or manual processes?" },
         { id: "R10-C17", ref: "10.4.1.1", risk_level: "high", question: "Are automated mechanisms used to perform audit log reviews and generate alerts on anomalies?" },
         { id: "R10-C18", ref: "10.4.2", risk_level: "high", question: "Are logs of all other system components not specified in 10.4.1 reviewed periodically based on the organisation's policies and risk management strategy?" },
         { id: "R10-C19", ref: "10.4.2.1", risk_level: "medium", question: "Is the frequency of periodic log reviews for all other system components defined in the entity's targeted risk analysis?" },
@@ -267,7 +267,7 @@ const SAQ_DATA = {
         { id: "R11-C17", ref: "11.4.7", risk_level: "high", question: "For multi-tenant service providers only: Is external penetration testing support provided to customers in accordance with PCI DSS requirements?" },
         { id: "R11-C18", ref: "11.5.1", risk_level: "high", question: "Is intrusion-detection and/or intrusion-prevention technology deployed to detect and/or prevent intrusions into the network?" },
         { id: "R11-C19", ref: "11.5.1.1", risk_level: "high", question: "For service providers only: Is intrusion-detection or prevention technology deployed to detect covert malware communication channels, including outbound DNS tunneling?" },
-        { id: "R11-C20", ref: "11.5.2", risk_level: "high", question: "Is a change-detection mechanism (e.g. file integrity monitoring) deployed to alert personnel to unauthorised modification of critical files, configuration files, and content files?" },
+        { id: "R11-C20", ref: "11.5.2", risk_level: "high", question: "Is a change-detection mechanism deployed to alert personnel to unauthorised modification of critical files, configuration files, and content files?" },
         { id: "R11-C21", ref: "11.6.1", risk_level: "critical", question: "Is a change and tamper-detection mechanism deployed to alert on unauthorised modification of HTTP headers and payment page scripts in the consumer's browser?" },
       ]
     },
@@ -337,21 +337,6 @@ export default function PCIGapAssessment() {
 
   useEffect(() => { setTimeout(() => setAnimateIn(true), 100); }, []);
 
-  async function handleEmailSubmit() {
-    if (!gateEmail.trim()) return;
-    setGateSubmitting(true);
-    try {
-      await fetch("https://formspree.io/f/mkoygljl", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "Accept": "application/json" },
-        body: JSON.stringify({ email: gateEmail, company: gateCompany, source: "PCI Gap Assessment PDF Download" })
-      });
-    } catch(e) {}
-    setGateSubmitting(false);
-    setShowEmailGate(false);
-    downloadPDF();
-  }
-
   const totalControls = SAQ_DATA.requirements.reduce((s, r) => s + r.controls.length, 0);
   const answeredCount = Object.keys(answers).length;
   const progress = (answeredCount / totalControls) * 100;
@@ -417,6 +402,21 @@ export default function PCIGapAssessment() {
   function hexToRgb(hex) {
     const r = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
     return r ? [parseInt(r[1], 16), parseInt(r[2], 16), parseInt(r[3], 16)] : [255, 255, 255];
+  }
+
+  async function handleEmailSubmit() {
+    if (!gateEmail.trim()) return;
+    setGateSubmitting(true);
+    try {
+      await fetch("https://formspree.io/f/mkoygljl", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        body: JSON.stringify({ email: gateEmail, company: gateCompany, source: "PCI Gap Assessment PDF Download" })
+      });
+    } catch (e) {}
+    setGateSubmitting(false);
+    setShowEmailGate(false);
+    downloadPDF();
   }
 
   function downloadPDF() {
@@ -517,6 +517,8 @@ export default function PCIGapAssessment() {
 
   const req = SAQ_DATA.requirements[activeReq];
 
+
+
   if (!started) {
     return (
       <div style={{ minHeight: "100vh", background: "#0A0E1A", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Georgia', serif", opacity: animateIn ? 1 : 0, transition: "opacity 0.8s ease" }}>
@@ -550,6 +552,40 @@ export default function PCIGapAssessment() {
     const criticalGaps = gaps.filter(g => g.risk_level === "critical");
     return (
       <div style={{ minHeight: "100vh", background: "#0A0E1A", fontFamily: "'Georgia', serif", padding: "40px 24px" }}>
+        {showEmailGate && (
+          <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9999, fontFamily: "'Georgia', serif" }}>
+            <div style={{ background: "#0F1525", border: "1px solid #2A3A50", borderRadius: 12, padding: 40, maxWidth: 480, width: "90%", position: "relative" }}>
+              <button onClick={() => setShowEmailGate(false)} style={{ position: "absolute", top: 16, right: 16, background: "transparent", border: "none", color: "#5A6A7A", fontSize: 20, cursor: "pointer", lineHeight: 1 }}>✕</button>
+              <div style={{ color: "#5B9BD5", fontSize: 11, fontFamily: "monospace", letterSpacing: 2, textTransform: "uppercase", marginBottom: 12 }}>PCI DSS v4.0.1</div>
+              <h2 style={{ color: "#E8EDF5", fontSize: 22, fontWeight: 700, marginBottom: 8, marginTop: 0 }}>Download Your Gap Report</h2>
+              <p style={{ color: "#7A8BA0", fontSize: 14, lineHeight: 1.6, marginBottom: 24 }}>Enter your details to download your personalised PCI DSS gap report. No data is stored on our servers.</p>
+              <input
+                autoFocus
+                value={gateEmail}
+                onChange={e => setGateEmail(e.target.value)}
+                onKeyDown={e => e.key === "Enter" && handleEmailSubmit()}
+                placeholder="Work email address *"
+                type="email"
+                style={{ width: "100%", padding: "12px 16px", background: "#0A0E1A", border: "1px solid #2A3A50", borderRadius: 6, color: "#E8EDF5", fontSize: 14, outline: "none", boxSizing: "border-box", marginBottom: 12, fontFamily: "inherit" }}
+              />
+              <input
+                value={gateCompany}
+                onChange={e => setGateCompany(e.target.value)}
+                onKeyDown={e => e.key === "Enter" && handleEmailSubmit()}
+                placeholder="Company name (optional)"
+                style={{ width: "100%", padding: "12px 16px", background: "#0A0E1A", border: "1px solid #2A3A50", borderRadius: 6, color: "#E8EDF5", fontSize: 14, outline: "none", boxSizing: "border-box", marginBottom: 24, fontFamily: "inherit" }}
+              />
+              <button
+                onClick={handleEmailSubmit}
+                disabled={gateSubmitting || !gateEmail.trim()}
+                style={{ width: "100%", padding: "14px", background: gateEmail.trim() ? "#1E56A0" : "#1A2535", color: gateEmail.trim() ? "#fff" : "#5A6A7A", border: "none", borderRadius: 6, fontSize: 15, fontWeight: 600, cursor: gateEmail.trim() ? "pointer" : "not-allowed", fontFamily: "inherit" }}
+              >
+                {gateSubmitting ? "Preparing your report..." : "↓ Download My Report"}
+              </button>
+              <p style={{ color: "#3A5068", fontSize: 11, textAlign: "center", marginTop: 16, marginBottom: 0 }}>No spam. Unsubscribe anytime.</p>
+            </div>
+          </div>
+        )}
         <div style={{ maxWidth: 820, margin: "0 auto" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 40, flexWrap: "wrap", gap: 16 }}>
             <div>
@@ -628,28 +664,7 @@ export default function PCIGapAssessment() {
           )}
         </div>
       </div>
-
-      {showEmailGate && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 }}>
-          <div style={{ background: "#0F1525", border: "1px solid #2A3A50", borderRadius: 12, padding: 40, maxWidth: 480, width: "90%", position: "relative" }}>
-            <button onClick={() => setShowEmailGate(false)} style={{ position: "absolute", top: 16, right: 16, background: "transparent", border: "none", color: "#5A6A7A", fontSize: 20, cursor: "pointer" }}>✕</button>
-            <div style={{ color: "#5B9BD5", fontSize: 11, fontFamily: "monospace", letterSpacing: 2, textTransform: "uppercase", marginBottom: 12 }}>PCI DSS v4.0.1</div>
-            <h2 style={{ color: "#E8EDF5", fontSize: 22, fontWeight: 700, marginBottom: 8, marginTop: 0 }}>Download Your Gap Report</h2>
-            <p style={{ color: "#7A8BA0", fontSize: 14, lineHeight: 1.6, marginBottom: 24 }}>Enter your details to download your personalised PCI DSS gap report. No data is stored on our servers.</p>
-            <input value={gateEmail} onChange={e => setGateEmail(e.target.value)} placeholder="Work email address *" type="email"
-              style={{ width: "100%", padding: "12px 16px", background: "#0A0E1A", border: "1px solid #2A3A50", borderRadius: 6, color: "#E8EDF5", fontSize: 14, outline: "none", boxSizing: "border-box", marginBottom: 12, fontFamily: "inherit" }} />
-            <input value={gateCompany} onChange={e => setGateCompany(e.target.value)} placeholder="Company name (optional)"
-              style={{ width: "100%", padding: "12px 16px", background: "#0A0E1A", border: "1px solid #2A3A50", borderRadius: 6, color: "#E8EDF5", fontSize: 14, outline: "none", boxSizing: "border-box", marginBottom: 24, fontFamily: "inherit" }} />
-            <button onClick={handleEmailSubmit} disabled={gateSubmitting || !gateEmail.trim()}
-              style={{ width: "100%", padding: "14px", background: gateEmail.trim() ? "#1E56A0" : "#1A2535", color: gateEmail.trim() ? "#fff" : "#5A6A7A", border: "none", borderRadius: 6, fontSize: 15, fontWeight: 600, cursor: gateEmail.trim() ? "pointer" : "not-allowed", fontFamily: "inherit" }}>
-              {gateSubmitting ? "Preparing your report..." : "↓ Download My Report"}
-            </button>
-            <p style={{ color: "#3A5068", fontSize: 11, textAlign: "center", marginTop: 16, marginBottom: 0 }}>No spam. Unsubscribe anytime.</p>
-          </div>
-        </div>
-      )}
-    </div>
-  );
+    );
   }
 
   return (
