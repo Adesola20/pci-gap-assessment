@@ -333,6 +333,10 @@ export default function PCIGapAssessment() {
 
   useEffect(() => { setTimeout(() => setAnimateIn(true), 100); }, []);
 
+  useEffect(() => {
+    window.ml_webform_success_RCBSj5 = function() { downloadPDF(); };
+  }, []);
+
   const totalControls = SAQ_DATA.requirements.reduce((s, r) => s + r.controls.length, 0);
   const answeredCount = Object.keys(answers).length;
   const progress = (answeredCount / totalControls) * 100;
@@ -540,7 +544,7 @@ export default function PCIGapAssessment() {
             </div>
             <div style={{ display: "flex", gap: 10 }}>
               <button onClick={() => setPhase("assess")} style={{ background: "transparent", border: "1px solid #2A3A50", color: "#7A8BA0", borderRadius: 6, padding: "10px 20px", cursor: "pointer", fontFamily: "inherit", fontSize: 13 }}>← Back</button>
-              <button onClick={() => { if(typeof ml !== 'undefined') ml('show', 'RCBSj5', true); setTimeout(() => downloadPDF(), 3000); }} style={{ background: "#1E56A0", border: "none", color: "#fff", borderRadius: 6, padding: "10px 24px", cursor: "pointer", fontFamily: "inherit", fontSize: 13, fontWeight: 600 }}
+              <button onClick={() => { if(typeof ml !== 'undefined') ml('show', 'RCBSj5', true); }} style={{ background: "#1E56A0", border: "none", color: "#fff", borderRadius: 6, padding: "10px 24px", cursor: "pointer", fontFamily: "inherit", fontSize: 13, fontWeight: 600 }}
                 onMouseOver={e => e.target.style.background = "#2563B0"} onMouseOut={e => e.target.style.background = "#1E56A0"}>↓ Download PDF Report</button>
             </div>
           </div>
