@@ -334,7 +334,7 @@ export default function PCIGapAssessment() {
   useEffect(() => { setTimeout(() => setAnimateIn(true), 100); }, []);
 
   useEffect(() => {
-    window.ml_webform_success_RCBSj5 = function() { downloadPDF(); };
+    window.pciDownloadPDF = downloadPDF;
   }, []);
 
   const totalControls = SAQ_DATA.requirements.reduce((s, r) => s + r.controls.length, 0);
