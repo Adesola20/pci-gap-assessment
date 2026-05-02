@@ -330,12 +330,27 @@ export default function PCIGapAssessment() {
   const [orgName, setOrgName] = useState("");
   const [started, setStarted] = useState(false);
   const [animateIn, setAnimateIn] = useState(false);
+  const [showEmailGate, setShowEmailGate] = useState(false);
+  const [gateEmail, setGateEmail] = useState("");
+  const [gateCompany, setGateCompany] = useState("");
+  const [gateSubmitting, setGateSubmitting] = useState(false);
 
   useEffect(() => { setTimeout(() => setAnimateIn(true), 100); }, []);
 
-  useEffect(() => {
-    window.pciDownloadPDF = downloadPDF;
-  }, []);
+  async function handleEmailSubmit() {
+    if (!gateEmail.trim()) return;
+    setGateSubmitting(true);
+    try {
+      await fetch("https://formspree.io/f/mkoygljl", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        body: JSON.stringify({ email: gateEmail, company: gateCompany, source: "PCI Gap Assessment PDF Download" })
+      });
+    } catch(e) {}
+    setGateSubmitting(false);
+    setShowEmailGate(false);
+    downloadPDF();
+  }
 
   const totalControls = SAQ_DATA.requirements.reduce((s, r) => s + r.controls.length, 0);
   const answeredCount = Object.keys(answers).length;
@@ -544,7 +559,7 @@ export default function PCIGapAssessment() {
             </div>
             <div style={{ display: "flex", gap: 10 }}>
               <button onClick={() => setPhase("assess")} style={{ background: "transparent", border: "1px solid #2A3A50", color: "#7A8BA0", borderRadius: 6, padding: "10px 20px", cursor: "pointer", fontFamily: "inherit", fontSize: 13 }}>← Back</button>
-              <button onClick={() => { if(typeof ml !== 'undefined') ml('show', 'RCBSj5', true); }} style={{ background: "#1E56A0", border: "none", color: "#fff", borderRadius: 6, padding: "10px 24px", cursor: "pointer", fontFamily: "inherit", fontSize: 13, fontWeight: 600 }}
+              <button onClick={() => setShowEmailGate(true)} style={{ background: "#1E56A0", border: "none", color: "#fff", borderRadius: 6, padding: "10px 24px", cursor: "pointer", fontFamily: "inherit", fontSize: 13, fontWeight: 600 }}
                 onMouseOver={e => e.target.style.background = "#2563B0"} onMouseOut={e => e.target.style.background = "#1E56A0"}>↓ Download PDF Report</button>
             </div>
           </div>
@@ -613,6 +628,26 @@ export default function PCIGapAssessment() {
           )}
         </div>
       </div>
+
+      {showEmailGate && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 }}>
+          <div style={{ background: "#0F1525", border: "1px solid #2A3A50", borderRadius: 12, padding: 40, maxWidth: 480, width: "90%", position: "relative" }}>
+            <button onClick={() => setShowEmailGate(false)} style={{ position: "absolute", top: 16, right: 16, background: "transparent", border: "none", color: "#5A6A7A", fontSize: 20, cursor: "pointer" }}>✕</button>
+            <div style={{ color: "#5B9BD5", fontSize: 11, fontFamily: "monospace", letterSpacing: 2, textTransform: "uppercase", marginBottom: 12 }}>PCI DSS v4.0.1</div>
+            <h2 style={{ color: "#E8EDF5", fontSize: 22, fontWeight: 700, marginBottom: 8, marginTop: 0 }}>Download Your Gap Report</h2>
+            <p style={{ color: "#7A8BA0", fontSize: 14, lineHeight: 1.6, marginBottom: 24 }}>Enter your details to download your personalised PCI DSS gap report. No data is stored on our servers.</p>
+            <input value={gateEmail} onChange={e => setGateEmail(e.target.value)} placeholder="Work email address *" type="email"
+              style={{ width: "100%", padding: "12px 16px", background: "#0A0E1A", border: "1px solid #2A3A50", borderRadius: 6, color: "#E8EDF5", fontSize: 14, outline: "none", boxSizing: "border-box", marginBottom: 12, fontFamily: "inherit" }} />
+            <input value={gateCompany} onChange={e => setGateCompany(e.target.value)} placeholder="Company name (optional)"
+              style={{ width: "100%", padding: "12px 16px", background: "#0A0E1A", border: "1px solid #2A3A50", borderRadius: 6, color: "#E8EDF5", fontSize: 14, outline: "none", boxSizing: "border-box", marginBottom: 24, fontFamily: "inherit" }} />
+            <button onClick={handleEmailSubmit} disabled={gateSubmitting || !gateEmail.trim()}
+              style={{ width: "100%", padding: "14px", background: gateEmail.trim() ? "#1E56A0" : "#1A2535", color: gateEmail.trim() ? "#fff" : "#5A6A7A", border: "none", borderRadius: 6, fontSize: 15, fontWeight: 600, cursor: gateEmail.trim() ? "pointer" : "not-allowed", fontFamily: "inherit" }}>
+              {gateSubmitting ? "Preparing your report..." : "↓ Download My Report"}
+            </button>
+            <p style={{ color: "#3A5068", fontSize: 11, textAlign: "center", marginTop: 16, marginBottom: 0 }}>No spam. Unsubscribe anytime.</p>
+          </div>
+        </div>
+      )}
     );
   }
 
