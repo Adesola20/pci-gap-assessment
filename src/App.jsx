@@ -334,8 +334,14 @@ export default function PCIGapAssessment() {
   const [gateEmail, setGateEmail] = useState("");
   const [gateCompany, setGateCompany] = useState("");
   const [gateSubmitting, setGateSubmitting] = useState(false);
+  const [downloading, setDownloading] = useState(false);
 
-  useEffect(() => { setTimeout(() => setAnimateIn(true), 100); }, []);
+  useEffect(() => {
+    setTimeout(() => setAnimateIn(true), 100);
+    const style = document.createElement('style');
+    style.textContent = '@keyframes spin { to { transform: rotate(360deg); } }';
+    document.head.appendChild(style);
+  }, []);
 
   const totalControls = SAQ_DATA.requirements.reduce((s, r) => s + r.controls.length, 0);
   const answeredCount = Object.keys(answers).length;
@@ -416,7 +422,11 @@ export default function PCIGapAssessment() {
     } catch (e) {}
     setGateSubmitting(false);
     setShowEmailGate(false);
-    downloadPDF();
+    setDownloading(true);
+    setTimeout(() => {
+      downloadPDF();
+      setDownloading(false);
+    }, 100);
   }
 
   function downloadPDF() {
@@ -595,8 +605,18 @@ export default function PCIGapAssessment() {
             </div>
             <div style={{ display: "flex", gap: 10 }}>
               <button onClick={() => setPhase("assess")} style={{ background: "transparent", border: "1px solid #2A3A50", color: "#7A8BA0", borderRadius: 6, padding: "10px 20px", cursor: "pointer", fontFamily: "inherit", fontSize: 13 }}>← Back</button>
-              <button onClick={() => setShowEmailGate(true)} style={{ background: "#1E56A0", border: "none", color: "#fff", borderRadius: 6, padding: "10px 24px", cursor: "pointer", fontFamily: "inherit", fontSize: 13, fontWeight: 600 }}
-                onMouseOver={e => e.target.style.background = "#2563B0"} onMouseOut={e => e.target.style.background = "#1E56A0"}>↓ Download PDF Report</button>
+              <button
+                onClick={() => !downloading && setShowEmailGate(true)}
+                style={{ background: downloading ? "#0D2137" : "#1E56A0", border: downloading ? "1px solid #2A4A6B" : "none", color: "#fff", borderRadius: 6, padding: "10px 24px", cursor: downloading ? "not-allowed" : "pointer", fontFamily: "inherit", fontSize: 13, fontWeight: 600, display: "flex", alignItems: "center", gap: 8, minWidth: 180, justifyContent: "center" }}
+                onMouseOver={e => { if(!downloading) e.currentTarget.style.background = "#2563B0"; }}
+                onMouseOut={e => { if(!downloading) e.currentTarget.style.background = "#1E56A0"; }}>
+                {downloading ? (
+                  <>
+                    <span style={{ display: "inline-block", width: 14, height: 14, border: "2px solid #5B9BD5", borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
+                    Generating report...
+                  </>
+                ) : "↓ Download PDF Report"}
+              </button>
             </div>
           </div>
 
